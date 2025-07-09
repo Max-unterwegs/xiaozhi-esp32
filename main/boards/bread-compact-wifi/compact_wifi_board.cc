@@ -16,6 +16,7 @@
 #include <driver/i2c_master.h>
 #include <esp_lcd_panel_ops.h>
 #include <esp_lcd_panel_vendor.h>
+#include <driver/ledc.h>
 
 #ifdef SH1106
 #include <esp_lcd_panel_sh1106.h>
@@ -36,6 +37,8 @@ private:
     Button touch_button_;
     Button volume_up_button_;
     Button volume_down_button_;
+    uint8_t servoAngle_; // 当前舵机角度值
+    ledc_channel_config_t servoLedcChannel;
 
     void InitializeDisplayI2c() {
         i2c_master_bus_config_t bus_config = {
@@ -158,9 +161,67 @@ private:
         auto& thing_manager = iot::ThingManager::GetInstance();
         thing_manager.AddThing(iot::CreateThing("Speaker"));
         thing_manager.AddThing(iot::CreateThing("Lamp"));
+        if (iot::userDev1Enable) thing_manager.AddThing(iot::CreateThing("Servo"));
 #elif CONFIG_IOT_PROTOCOL_MCP
         static LampController lamp(LAMP_GPIO);
 #endif
+    }
+
+    // 舵机初始化
+    void InitializeServo()
+    {
+        ESP_LOGI(TAG, "Initializing servo...");
+
+        // 配置 GPIO 为输出模式
+        gpio_config_t io_conf = {};
+        io_conf.intr_type = GPIO_INTR_DISABLE;
+        io_conf.mode = GPIO_MODE_OUTPUT;
+        io_conf.pin_bit_mask = (1ULL << GPIO_NUM_14);
+        io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
+        io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
+        esp_err_t ret = gpio_config(&io_conf);
+        if (ret != ESP_OK)
+        {
+            ESP_LOGE(TAG, "Failed to configure GPIO: %s", esp_err_to_name(ret));
+            return;
+        }
+        ESP_LOGI(TAG, "GPIO configured successfully");
+
+        // 配置 LEDC 定时器
+        ledc_timer_config_t ledc_timer = {
+            .speed_mode = LEDC_LOW_SPEED_MODE,
+            .duty_resolution = LEDC_TIMER_14_BIT, // 使用 14 位分辨率
+            .timer_num = LEDC_TIMER_2,
+            .freq_hz = 50, // 50Hz
+            .clk_cfg = LEDC_AUTO_CLK};
+        ret = ledc_timer_config(&ledc_timer);
+        if (ret != ESP_OK)
+        {
+            ESP_LOGE(TAG, "Failed to configure LEDC timer: %s", esp_err_to_name(ret));
+            return;
+        }
+        ESP_LOGI(TAG, "LEDC timer configured successfully");
+
+        // 配置 LEDC 通道
+        servoLedcChannel = {
+            .gpio_num = GPIO_NUM_14,
+            .speed_mode = LEDC_LOW_SPEED_MODE,
+            .channel = LEDC_CHANNEL_2,
+            .intr_type = LEDC_INTR_DISABLE,
+            .timer_sel = LEDC_TIMER_2,
+            .duty = 0,
+            .hpoint = 0};
+        ret = ledc_channel_config(&servoLedcChannel);
+        if (ret != ESP_OK)
+        {
+            ESP_LOGE(TAG, "Failed to configure LEDC channel: %s", esp_err_to_name(ret));
+            return;
+        }
+        ESP_LOGI(TAG, "LEDC channel configured successfully");
+
+        ESP_LOGI(TAG, "Servo initialized successfully");
+
+        SetServoAngle(90); // 设置初始角度为 90 度
     }
 
 public:
@@ -173,6 +234,7 @@ public:
         InitializeSsd1306Display();
         InitializeButtons();
         InitializeIot();
+        InitializeServo();
     }
 
     virtual Led* GetLed() override {
@@ -193,6 +255,33 @@ public:
 
     virtual Display* GetDisplay() override {
         return display_;
+    }
+
+    // 获取当前舵机角度值
+    virtual uint8_t GetServoAngle() override {
+        return servoAngle_;
+    }
+
+    // 设置当前舵机角度值
+    virtual void SetServoAngle(uint8_t angle) override
+    {
+        if (!iot::userDev1Enable) return;
+
+        if (angle > 180)
+        {
+            angle = 180;
+        }
+        servoAngle_ = angle;
+        ESP_LOGI(TAG, "Set servo angle to %d", servoAngle_);
+
+        // 计算占空比
+        uint32_t min_duty = 410;  // 对应 0.5ms
+        uint32_t max_duty = 2048; // 对应 2.5ms
+        uint32_t duty = min_duty + (angle * (max_duty - min_duty) / 180);
+
+        // 更新占空比
+        ESP_ERROR_CHECK(ledc_set_duty(servoLedcChannel.speed_mode, servoLedcChannel.channel, duty));
+        ESP_ERROR_CHECK(ledc_update_duty(servoLedcChannel.speed_mode, servoLedcChannel.channel));
     }
 };
 

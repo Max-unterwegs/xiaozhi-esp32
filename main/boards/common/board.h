@@ -1,3 +1,9 @@
+/*
+ * @Date: 2025-07-09 00:30:09
+ * @LastEditors: Max-unterwegs && max_unterwegs@126.com 
+ * @LastEditTime: 2025-07-09 15:26:21
+ * @FilePath: \xiaozhi-esp32\main\boards\common\board.h
+ */
 #ifndef BOARD_H
 #define BOARD_H
 
@@ -52,6 +58,12 @@ public:
     virtual void SetPowerSaveMode(bool enabled) = 0;
     virtual std::string GetBoardJson() = 0;
     virtual std::string GetDeviceStatusJson() = 0;
+    virtual uint8_t GetServoAngle(void) {
+        return 0;
+    }
+    virtual void SetServoAngle(uint8_t angle) {
+        // do nothing
+    }
 };
 
 #define DECLARE_BOARD(BOARD_CLASS_NAME) \
