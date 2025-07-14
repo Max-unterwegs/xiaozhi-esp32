@@ -191,7 +191,7 @@ private:
         auto& thing_manager = iot::ThingManager::GetInstance();
         thing_manager.AddThing(iot::CreateThing("Speaker"));
         thing_manager.AddThing(iot::CreateThing("Lamp"));
-        if (iot::userDev1Enable) thing_manager.AddThing(iot::CreateThing("Servo"));
+        thing_manager.AddThing(iot::CreateThing("Servo"));
 #elif CONFIG_IOT_PROTOCOL_MCP
         static LampController lamp(LAMP_GPIO);
 #endif
@@ -296,7 +296,6 @@ public:
     // 设置当前舵机角度值
     virtual void SetServoAngle(uint8_t angle) override
     {
-        if (!iot::userDev1Enable) return;
 
         if (angle > 180)
         {

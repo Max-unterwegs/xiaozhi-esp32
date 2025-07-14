@@ -1,7 +1,7 @@
 /*
  * @Date: 2025-07-09 15:49:35
  * @LastEditors: Max-unterwegs && max_unterwegs@126.com 
- * @LastEditTime: 2025-07-09 16:40:20
+ * @LastEditTime: 2025-07-14 10:18:57
  * @FilePath: \xiaozhi-esp32\main\iot\things\servo.cc
  */
 #include "iot/thing.h"
@@ -19,7 +19,7 @@ namespace iot
     class Servo : public Thing
     {
     public:
-        Servo() : Thing("Servo", userDev1Name)
+        Servo() : Thing("Servo", "舵机")
         {
             // 定义设备的属性
             properties_.AddNumberProperty("angle", "当前角度值", [this]() -> int {

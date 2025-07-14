@@ -10,9 +10,6 @@
 
 namespace iot {
 
-    extern std::string userDev1Name;
-    extern bool userDev1Enable;
-
 enum ValueType {
     kValueTypeBoolean,
     kValueTypeNumber,

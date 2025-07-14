@@ -13,15 +13,9 @@
 
 #include "application.h"
 #include "system_info.h"
-#include "settings.h"
 
 #define TAG "main"
 
-namespace iot
-{
-    std::string userDev1Name;
-    bool userDev1Enable;
-}
 
 extern "C" void app_main(void)
 {
@@ -36,10 +30,6 @@ extern "C" void app_main(void)
         ret = nvs_flash_init();
     }
     ESP_ERROR_CHECK(ret);
-
-    Settings settings("userData", false);
-    iot::userDev1Name = settings.GetString("userDev1Name", "舵机");
-    iot::userDev1Enable = settings.GetInt("userDev1Enable", 1);
 
     // Launch the application
     Application::GetInstance().Start();
