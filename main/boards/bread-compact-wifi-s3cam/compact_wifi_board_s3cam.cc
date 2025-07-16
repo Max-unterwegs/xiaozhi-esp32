@@ -19,6 +19,8 @@
 #include <esp_lcd_panel_ops.h>
 #include <driver/spi_common.h>
 
+#include "serial_controller.h"
+
 #if defined(LCD_TYPE_ILI9341_SERIAL)
 #include "esp_lcd_ili9341.h"
 #endif
@@ -186,6 +188,7 @@ private:
         thing_manager.AddThing(iot::CreateThing("Speaker"));
         thing_manager.AddThing(iot::CreateThing("Screen"));
 #elif CONFIG_IOT_PROTOCOL_MCP
+        SerialController serial_controller;
 
 #endif
     }
