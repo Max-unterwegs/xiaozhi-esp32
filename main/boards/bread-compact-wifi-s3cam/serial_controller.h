@@ -10,10 +10,10 @@
 #include "mcp_server.h"      // MCP服务器头文件
 // 配置参数
 #define UART_PORT_NUM      UART_NUM_1    // 使用UART
-#define TXD_PIN            GPIO_NUM_43   // 发送引脚
-#define RXD_PIN            GPIO_NUM_44   // 接收引脚
+#define TXD_PIN            GPIO_NUM_3   // 发送引脚
+#define RXD_PIN            GPIO_NUM_46   // 接收引脚
 #define BUF_SIZE           1024          // 缓冲区大小
-#define UART_BAUD_RATE     9600        // 波特率
+#define UART_BAUD_RATE     38400        // 波特率
 
 static char buffer[256];  // 接收缓冲区
 
@@ -23,7 +23,7 @@ static char buffer[256];  // 接收缓冲区
 class SerialController
 {
 private:
-        void uart_init() {
+        void SerialController_init() {
             // UART配置结构体
             uart_config_t uart_config = {
                 .baud_rate = UART_BAUD_RATE,
@@ -83,6 +83,7 @@ private:
 public:
     SerialController()
     {
+        SerialController_init();
         auto &mcp_server = McpServer::GetInstance();
         // 水平位置归零
         mcp_server.AddTool("self.turntable.reset_horizontal",
@@ -213,7 +214,7 @@ public:
                            PropertyList(),
                            [this](const PropertyList &) -> ReturnValue
                            {
-                                this->uart_send_str("pan_to_position_3");
+                                this->uart_send_str("C");
                                 ESP_LOGI(TAG, "UART response: %s", this->uart_receive_str());
                                 return true;
                            });
