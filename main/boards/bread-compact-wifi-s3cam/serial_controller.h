@@ -91,7 +91,7 @@ public:
                            PropertyList(),
                            [this](const PropertyList &) -> ReturnValue
                            {
-                                this->uart_send_str("reset_horizontal");
+                                this->uart_send_str("0");
                                 ESP_LOGI(TAG, "UART response: %s", this->uart_receive_str());
                                 return true;
 
@@ -103,58 +103,78 @@ public:
                            PropertyList(),
                            [this](const PropertyList &) -> ReturnValue
                            {
-                                this->uart_send_str("reset_vertical");
+                                this->uart_send_str("E");
                                 ESP_LOGI(TAG, "UART response: %s", this->uart_receive_str());
                                 return true;
                            });
 
-        // 水平相对旋转
-        mcp_server.AddTool("self.turntable.rotate_horizontal",
-                           "转台水平方向相对旋转，正数顺时针，负数逆时针",
-                           PropertyList({Property("angle", kPropertyTypeInteger, -360, 360)}),
-                           [this](const PropertyList &properties) -> ReturnValue
-                           {
-                                 int angle = properties["angle"].value<int>();
-                                 this->uart_printf("H%d", static_cast<int>(angle));
-                                 ESP_LOGI(TAG, "UART response: %s", this->uart_receive_str());
-                                 return true;   
-                           });
+        // // 水平相对旋转
+        // mcp_server.AddTool("self.turntable.rotate_horizontal",
+        //                    "转台水平方向相对旋转，正数顺时针，负数逆时针",
+        //                    PropertyList({Property("angle", kPropertyTypeInteger, -360, 360)}),
+        //                    [this](const PropertyList &properties) -> ReturnValue
+        //                    {
+        //                          int angle = properties["angle"].value<int>();
+        //                          this->uart_printf("H%d", static_cast<int>(angle));
+        //                          ESP_LOGI(TAG, "UART response: %s", this->uart_receive_str());
+        //                          return true;   
+        //                    });
 
-        // 垂直相对移动
-        mcp_server.AddTool("self.turntable.move_vertical",
-                           "转台垂直方向相对移动，正数向上，负数向下",
-                           PropertyList({Property("angle", kPropertyTypeInteger, -180, 180)}),
-                           [this](const PropertyList &properties) -> ReturnValue
-                           {
-                                 int angle = properties["angle"].value<int>();
-                                 this->uart_printf("V%d", static_cast<int>(angle));
-                                 ESP_LOGI(TAG, "UART response: %s", this->uart_receive_str());
-                                 return true;
-                           });
+        // // 垂直相对移动
+        // mcp_server.AddTool("self.turntable.move_vertical",
+        //                    "转台垂直方向相对移动，正数向上，负数向下",
+        //                    PropertyList({Property("angle", kPropertyTypeInteger, -180, 180)}),
+        //                    [this](const PropertyList &properties) -> ReturnValue
+        //                    {
+        //                          int angle = properties["angle"].value<int>();
+        //                          this->uart_printf("V%d", static_cast<int>(angle));
+        //                          ESP_LOGI(TAG, "UART response: %s", this->uart_receive_str());
+        //                          return true;
+        //                    });
 
+        // // 水平绝对位置移动
+        // mcp_server.AddTool("self.turntable.move_to_horizontal",
+        //                    "转台水平方向移动到绝对位置",
+        //                    PropertyList({Property("target_angle", kPropertyTypeInteger, 0, 360)}),
+        //                    [this](const PropertyList &properties) -> ReturnValue
+        //                    {
+        //                          int target_angle = properties["target_angle"].value<int>();
+        //                          this->uart_printf("H%d", target_angle);
+        //                          ESP_LOGI(TAG, "UART response: %s", this->uart_receive_str());
+        //                          return true;
+        //                    });
         // 水平绝对位置移动
-        mcp_server.AddTool("self.turntable.move_to_horizontal",
-                           "转台水平方向移动到绝对位置",
+        mcp_server.AddTool("self.turntable.move_to_+90",
+                           "转台水平方向移动+90度",
                            PropertyList({Property("target_angle", kPropertyTypeInteger, 0, 360)}),
                            [this](const PropertyList &properties) -> ReturnValue
                            {
-                                 int target_angle = properties["target_angle"].value<int>();
-                                 this->uart_printf("H%d", target_angle);
+                                 this->uart_send_str("+");
+                                 ESP_LOGI(TAG, "UART response: %s", this->uart_receive_str());
+                                 return true;
+                           });
+        // 水平绝对位置移动
+        mcp_server.AddTool("self.turntable.move_to_-90",
+                           "转台水平方向移动-90度",
+                           PropertyList({Property("target_angle", kPropertyTypeInteger, 0, 360)}),
+                           [this](const PropertyList &properties) -> ReturnValue
+                           {
+                                 this->uart_send_str("-");
                                  ESP_LOGI(TAG, "UART response: %s", this->uart_receive_str());
                                  return true;
                            });
 
-        // PAN复合动作
-        mcp_server.AddTool("self.turntable.pan_action",
-                           "转台移动到指定角度下料",
-                           PropertyList({Property("horizontal_angle", kPropertyTypeInteger, 0, 360)}),
-                           [this](const PropertyList &properties) -> ReturnValue
-                           {
-                                 int horizontal_angle = properties["horizontal_angle"].value<int>();
-                                 this->uart_printf("H%d", horizontal_angle);
-                                 ESP_LOGI(TAG, "UART response: %s", this->uart_receive_str());
-                                 return true;
-                           });
+        // // PAN复合动作
+        // mcp_server.AddTool("self.turntable.pan_action",
+        //                    "转台移动到指定角度下料",
+        //                    PropertyList({Property("horizontal_angle", kPropertyTypeInteger, 0, 360)}),
+        //                    [this](const PropertyList &properties) -> ReturnValue
+        //                    {
+        //                          int horizontal_angle = properties["horizontal_angle"].value<int>();
+        //                          this->uart_printf("H%d", horizontal_angle);
+        //                          ESP_LOGI(TAG, "UART response: %s", this->uart_receive_str());
+        //                          return true;
+        //                    });
 
         // 垂直小幅下降
         mcp_server.AddTool("self.turntable.move_vertical_small_down",
@@ -162,7 +182,7 @@ public:
                            PropertyList(),
                            [this](const PropertyList &) -> ReturnValue
                            {
-                                 this->uart_send_str("move_vertical_small_down");
+                                 this->uart_send_str("F");
                                  ESP_LOGI(TAG, "UART response: %s", this->uart_receive_str());
                                  return true;
                            });
@@ -173,7 +193,7 @@ public:
                            PropertyList(),
                            [this](const PropertyList &) -> ReturnValue
                            {
-                                 this->uart_send_str("move_up");
+                                 this->uart_send_str("z");
                                  ESP_LOGI(TAG, "UART response: %s", this->uart_receive_str());
                                  return true;
                            });
@@ -183,7 +203,7 @@ public:
                            PropertyList(),
                            [this](const PropertyList &) -> ReturnValue
                            {
-                                    this->uart_send_str("move_down");
+                                    this->uart_send_str("f");
                                     ESP_LOGI(TAG, "UART response: %s", this->uart_receive_str());
                                     return true;
                            });
@@ -194,7 +214,7 @@ public:
                            PropertyList(),
                            [this](const PropertyList &) -> ReturnValue
                            {
-                                this->uart_send_str("pan_to_position_1");
+                                this->uart_send_str("A");
                                 ESP_LOGI(TAG, "UART response: %s", this->uart_receive_str());
                                 return true;
                            });
@@ -204,7 +224,7 @@ public:
                            PropertyList(),
                            [this](const PropertyList &) -> ReturnValue
                            {
-                                this->uart_send_str("pan_to_position_2");
+                                this->uart_send_str("B");
                                 ESP_LOGI(TAG, "UART response: %s", this->uart_receive_str());
                                 return true;
                            });
@@ -224,7 +244,7 @@ public:
                            PropertyList(),
                            [this](const PropertyList &) -> ReturnValue
                            {
-                                this->uart_send_str("pan_to_position_4");
+                                this->uart_send_str("D");
                                 ESP_LOGI(TAG, "UART response: %s", this->uart_receive_str());
                                 return true;
                            });
