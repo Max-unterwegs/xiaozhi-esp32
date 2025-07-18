@@ -248,6 +248,44 @@ public:
                                 ESP_LOGI(TAG, "UART response: %s", this->uart_receive_str());
                                 return true;
                            });
+        mcp_server.AddTool("self.scara.mix",
+                           "帮我搅拌一下",
+                           PropertyList(),
+                           [this](const PropertyList &) -> ReturnValue
+                           {
+                                this->uart_send_str("J");
+                                ESP_LOGI(TAG, "UART response: %s", this->uart_receive_str());
+                                return true;
+                           });
+        mcp_server.AddTool("self.scara.fry",
+                           "帮我翻炒一下",
+                           PropertyList(),
+                           [this](const PropertyList &) -> ReturnValue
+                           {
+                                this->uart_send_str("K");
+                                ESP_LOGI(TAG, "UART response: %s", this->uart_receive_str());
+                                return true;
+                           });
+        //放下1号厨具
+        mcp_server.AddTool("self.scara.put_down_tool_1",
+                           "放下1号厨具",
+                           PropertyList(),
+                           [this](const PropertyList &) -> ReturnValue
+                           {
+                                this->uart_send_str("L");
+                                ESP_LOGI(TAG, "UART response: %s", this->uart_receive_str());
+                                return true;
+                           });
+        //拿起1号厨具
+        mcp_server.AddTool("self.scara.pick_up_tool_1",
+                           "拿起1号厨具",
+                           PropertyList(),
+                           [this](const PropertyList &) -> ReturnValue
+                           {
+                                this->uart_send_str("M");
+                                ESP_LOGI(TAG, "UART response: %s", this->uart_receive_str());
+                                return true;
+                           });
     }
 };
 
